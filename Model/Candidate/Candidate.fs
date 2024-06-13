@@ -1,6 +1,8 @@
 module Model.Candidate.Candidate
 
+open Model.General
+
 type Candidate =
-    { Name: string
-      GuardianId: string
-      Diploma: string }
+    { Name: PersonName
+      GuardianId: GuardianIdentifier
+      Diploma: Diploma }

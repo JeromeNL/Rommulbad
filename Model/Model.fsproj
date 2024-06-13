@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="CustomValidation.fs" />
+        <Compile Include="General.fs" />
         <Compile Include="Candidate\Candidate.fs" />
         <Compile Include="Session\Session.fs" />
         <Compile Include="Guardian\Guardian.fs" />

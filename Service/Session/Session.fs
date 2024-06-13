@@ -8,6 +8,7 @@ open Thoth.Json.Giraffe
 open Service.Serializers
 open Rommulbad.Store
 open Thoth.Json.Net
+open Model.General
 
 
 let addSession (name: string) : HttpHandler =
@@ -18,14 +19,12 @@ let addSession (name: string) : HttpHandler =
 
             match session with
             | Error errorMessage -> return! RequestErrors.BAD_REQUEST errorMessage next ctx
-            | Ok { Deep = deep
-                   Date = date
-                   Minutes = minutes } ->
+            | Ok { Deep = deep; Date = date; Minutes = (MinutesAmount minutes) } ->
                 let store = ctx.GetService<Store>()
 
+                // Insert the session with minutes converted to int
                 InMemoryDatabase.insert (name, date) (name, deep, date, minutes) store.sessions
                 |> ignore
-
 
                 return! text "OK" next ctx
         }
