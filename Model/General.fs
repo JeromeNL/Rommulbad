@@ -1,6 +1,9 @@
 module Model.General
 
 open System.Text.RegularExpressions
+open Thoth.Json.Net
+
+
 
 // Guardian
 // ID format: 123-ABCD
@@ -21,7 +24,20 @@ module GuardianIdentifier =
         |> CustomValidation.matches validDepartmentIdentifier "ID must be in format: 123-ABCD"
         |> Result.map GuardianIdentifier
         
-        
+    let toString (GuardianIdentifier id) = id
+
+    let fromString (s: string) : Result<GuardianIdentifier, string> =
+        s |> CustomValidation.matches validDepartmentIdentifier "ID must be in format: 123-ABCD" |> Result.map GuardianIdentifier
+
+    let encoder : Encoder<GuardianIdentifier> =
+        fun (GuardianIdentifier id) -> Encode.string id
+
+    let decoder : Decoder<GuardianIdentifier> =
+        Decode.string
+        |> Decode.andThen (fun s ->
+            match fromString s with
+            | Ok id -> Decode.succeed id
+            | Error err -> Decode.fail err)
 
 // Name format: "Joram Kwetters"
 type PersonName = private | PersonName of string
@@ -38,9 +54,23 @@ module PersonName =
         |> CustomValidation.nonEmpty "Person name may not be empty."
         |> Result.bind (CustomValidation.onlyLetters "Person name may contain only letters.")
         |> Result.map PersonName
-        
-// Candidates from same Gruadian can't have same name
+   
+// Candidates from same Guardian can't have same name
+    let toString (PersonName name) = name
+    let validPersonName = Regex("^[a-zA-Z ]+$")
 
+    let fromString (s: string) : Result<PersonName, string> =
+        s |> CustomValidation.matches validPersonName "Invalid person name" |> Result.map PersonName
+
+    let encoder : Encoder<PersonName> =
+        fun (PersonName name) -> Encode.string name
+
+    let decoder : Decoder<PersonName> =
+        Decode.string
+        |> Decode.andThen (fun s ->
+            match fromString s with
+            | Ok name -> Decode.succeed name
+            | Error err -> Decode.fail err)
 
 
 

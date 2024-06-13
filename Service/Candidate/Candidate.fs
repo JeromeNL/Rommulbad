@@ -47,7 +47,6 @@ let getCandidate (name: string) : HttpHandler =
                             ctx
                 | _ -> return! RequestErrors.BAD_REQUEST "Invalid candidate data" next ctx
         }
-
         
         
 let routes: HttpHandler =

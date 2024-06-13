@@ -10,7 +10,7 @@
       <Folder Include="General\" />
       <Compile Include="Candidate\Candidate.fs" />
       <Compile Include="Session\Session.fs" />
-      <Folder Include="Guardian\" />
+      <Compile Include="Guardian\Guardian.fs" />
       <Compile Include="HttpHandlers.fs" />
     </ItemGroup>
 
