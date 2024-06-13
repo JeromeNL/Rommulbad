@@ -45,13 +45,14 @@ module PersonName =
 
     /// Construct a valid perosn name from a raw string or indicate that the string is not a valid employee name.
     let make rawIdentifier =
+        let validPersonName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
         rawIdentifier
         |> CustomValidation.nonEmpty "Person name may not be empty."
-        |> Result.bind (CustomValidation.onlyLetters "Person name may contain only letters.")
+        |> Result.bind (CustomValidation.matches validPersonName "Person name must be in format: 'Firstname Lastname'")
         |> Result.map PersonName
    
     let toString (PersonName name) = name
-    let validPersonName = Regex("^[a-zA-Z ]+$")
+    let validPersonName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
 
     let fromString (s: string) : Result<PersonName, string> =
         s |> CustomValidation.matches validPersonName "Invalid person name" |> Result.map PersonName
