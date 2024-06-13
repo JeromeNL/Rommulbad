@@ -1,13 +1,10 @@
 module Rommulbad.Guardian.Guardian
 
-
 open Giraffe
-open Model.Candidate.Candidate
 open Rommulbad.Database
 open Thoth.Json.Giraffe
 open Service.Serializers
 open Rommulbad.Store
-open Thoth.Json.Net
 open Model.Guardian.Guardian
 open Model.General
 
@@ -36,8 +33,6 @@ let addGuardian : HttpHandler =
         }
 
 
-
-
 let getGuardians: HttpHandler =
     fun next ctx ->
         task {
@@ -54,10 +49,6 @@ let getGuardians: HttpHandler =
             let response = guardians |> Seq.toList
             return! json response next ctx
         }
-
-
-
-
 
 
 let routes: HttpHandler =

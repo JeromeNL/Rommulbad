@@ -1,9 +1,7 @@
 module Model.Session.Session
 
-open Model.General
-open Thoth.Json.Net
-open Thoth.Json.Giraffe
 open System
+open Model.General
 
 type Session =
     { Deep: Boolean

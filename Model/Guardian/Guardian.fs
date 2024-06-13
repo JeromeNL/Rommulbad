@@ -1,7 +1,7 @@
 module Model.Guardian.Guardian
 
-open Model.Candidate.Candidate
 open Model.General
+open Model.Candidate.Candidate
 
 type Guardian =
     { Id: GuardianIdentifier

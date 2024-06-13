@@ -29,17 +29,7 @@ module Candidate =
             | (_, Error err, _) -> failwithf "Error decoding guardian_id: %s" err
             | (_, _, Error err) -> failwithf "Error decoding diploma: %s" err)
 
-/// Swimming session registered on a specific date
-///
-/// A Swimming session can be in the deep or shallow pool
-/// Minutes cannot be negative or larger than 30
-/// Only the year, month and date of Date are used.
-
-
 module Session =
-    open Thoth.Json.Net
-    open Model.General
-
     let encode: Encoder<Session> =
         fun session ->
             Encode.object
@@ -57,15 +47,7 @@ module Session =
             | Ok minutesAmount -> { Deep = deep; Date = date; Minutes = minutesAmount }
             | Error err -> failwith err)  
 
-
-
-/// A guardian has an Id (3 digits followed by a dash and 4 letters),
-/// a Name (only letters and spaces, but cannot contain two or more consecutive spaces),
-/// and a list of Candidates (which may be empty)
 module Guardian =
-    open Thoth.Json.Net
-    open Model.General
-
     let encode: Encoder<Guardian> =
         fun guardian ->
             Encode.object
@@ -84,5 +66,3 @@ module Guardian =
                   Candidates = [] }  // Ignore candidates
             | Error idErr, _ -> failwith idErr
             | _, Error nameErr -> failwith nameErr )
-
-

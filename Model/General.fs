@@ -4,10 +4,6 @@ open System.Text.RegularExpressions
 open Thoth.Json.Net
 
 
-
-// Guardian
-// ID format: 123-ABCD
-/// Every department stored is identifier by a unique identifier.
 type GuardianIdentifier = private | GuardianIdentifier of string
 
 /// Provides access to raw department identifier by pattern matching.
@@ -16,7 +12,7 @@ let (|GuardianIdentifier|) (GuardianIdentifier guardianIdentifier) = guardianIde
 [<RequireQualifiedAccess>]
 module GuardianIdentifier =
 
-    /// A valid GuadianIdentifer is three digits, dash, 4 capital letters
+    /// A valid GuadianIdentifier is three digits, dash, 4 capital letters
     let private validDepartmentIdentifier = Regex "^\d{3}-[A-Z]{4}$"
 
     let make rawIdentifier =
@@ -25,7 +21,7 @@ module GuardianIdentifier =
         |> Result.map GuardianIdentifier
         
     let toString (GuardianIdentifier id) = id
-
+    
     let fromString (s: string) : Result<GuardianIdentifier, string> =
         s |> CustomValidation.matches validDepartmentIdentifier "ID must be in format: 123-ABCD" |> Result.map GuardianIdentifier
 
@@ -42,7 +38,6 @@ module GuardianIdentifier =
 // Name format: "Joram Kwetters"
 type PersonName = private | PersonName of string
 
-
 let (|PersonName|) (PersonName personName) = personName
 
 [<RequireQualifiedAccess>]
@@ -55,7 +50,6 @@ module PersonName =
         |> Result.bind (CustomValidation.onlyLetters "Person name may contain only letters.")
         |> Result.map PersonName
    
-// Candidates from same Guardian can't have same name
     let toString (PersonName name) = name
     let validPersonName = Regex("^[a-zA-Z ]+$")
 
@@ -73,29 +67,20 @@ module PersonName =
             | Error err -> Decode.fail err)
 
 
-
-
-// Minutes in session: 0 <= x <= 30
-
-/// The amount of hours.
 type MinutesAmount = private | MinutesAmount of int
 
-/// Provides access to raw hours amount by pattern matching.
+/// Provides access to raw minutes amount by pattern matching.
 let (|MinutesAmount|) (MinutesAmount minutesAmount) = minutesAmount
 
 [<RequireQualifiedAccess>]
 module MinutesAmount =
-
-    /// Amount cannot be negative or larger than 16
     let private minMinutesAmount = 0
     let private maxMinutesAmount = 30
 
-    /// Construct a valid hours amount from a raw int or indicate that the int is not a valid hours amount.
     let make rawHours =
         rawHours
-        |> CustomValidation.between minMinutesAmount maxMinutesAmount "Hours must be between 0 and 30 minutes"
+        |> CustomValidation.between minMinutesAmount maxMinutesAmount "Minutes must be between 0 and 30 minutes"
         |> Result.map MinutesAmount
-
 
 
 // Diploma

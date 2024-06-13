@@ -1,8 +1,6 @@
 module Rommulbad.Session.Session
 
-
 open Giraffe
-open Model.Candidate.Candidate
 open Rommulbad.Database
 open Thoth.Json.Giraffe
 open Service.Serializers
