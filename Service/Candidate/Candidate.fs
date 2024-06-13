@@ -7,6 +7,7 @@ open Thoth.Json.Giraffe
 open Service.Serializers
 open Rommulbad.Store
 open Model.General
+open System
 
 let getCandidates: HttpHandler =
     fun next ctx ->
@@ -48,9 +49,35 @@ let getCandidate (name: string) : HttpHandler =
                 | _ -> return! RequestErrors.BAD_REQUEST "Invalid candidate data" next ctx
         }
         
+let addCandidate : HttpHandler =
+    fun next ctx ->
+        task {
+            let! candidateResult = ThothSerializer.ReadBody ctx Candidate.decode
+
+            match candidateResult with
+            | Error errorMessage -> return! RequestErrors.BAD_REQUEST errorMessage next ctx
+            | Ok candidate ->
+                let store = ctx.GetService<Store>()
+
+                // Convert Candidate fields to strings
+                let nameStr = PersonName.toString candidate.Name
+                let guardianIdStr = GuardianIdentifier.toString candidate.GuardianId
+                let diplomaStr = match candidate.Diploma with Diploma diploma -> diploma
+                let currentDateTime = DateTime.Now
+
+                // Prepare the value to insert
+                let value = (nameStr, currentDateTime, guardianIdStr, "")
+                
+                // Insert the candidate
+                match InMemoryDatabase.insert nameStr value store.candidates with
+                | Ok () -> return! json candidate next ctx
+                | Error (UniquenessError msg) -> return! RequestErrors.BAD_REQUEST msg next ctx
+        }
         
+
 let routes: HttpHandler =
     choose
         [ GET >=> route "/candidate" >=> getCandidates
           GET >=> routef "/candidate/%s" getCandidate
+          POST >=> route "/candidate" >=> addCandidate
            ]
