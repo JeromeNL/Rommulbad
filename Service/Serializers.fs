@@ -12,13 +12,13 @@ module Candidate =
     let encode: Encoder<Candidate> =
         fun candidate ->
             Encode.object
-                [ "name", Encode.string (match candidate.Name with PersonName name -> name)
+                [ "name", Encode.string (match candidate.Name with CandidateName name -> name)
                   "guardian_id", Encode.string (match candidate.GuardianId with GuardianIdentifier id -> id)
                   "diploma", Encode.string (match candidate.Diploma with Diploma diploma -> diploma) ]
 
     let decode: Decoder<Candidate> =
         Decode.object (fun get ->
-            match (PersonName.make (get.Required.Field "name" Decode.string),
+            match (CandidateName.make (get.Required.Field "name" Decode.string),
                    GuardianIdentifier.make (get.Required.Field "guardian_id" Decode.string),
                    Diploma.make (get.Required.Field "diploma" Decode.string)) with
             | (Ok name, Ok guardianId, Ok diploma) ->

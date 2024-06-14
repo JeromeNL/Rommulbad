@@ -35,7 +35,7 @@ module GuardianIdentifier =
             | Ok id -> Decode.succeed id
             | Error err -> Decode.fail err)
 
-// Name format: "Joram Kwetters"
+// Name format: "Joram Kwetters" GUARDIAN
 type PersonName = private | PersonName of string
 
 let (|PersonName|) (PersonName personName) = personName
@@ -67,6 +67,37 @@ module PersonName =
             | Ok name -> Decode.succeed name
             | Error err -> Decode.fail err)
 
+// Name format: "Joram" CANDIDATE
+type CandidateName = private | CandidateName of string
+
+let (|CandidateName|) (CandidateName candidateName) = candidateName
+
+[<RequireQualifiedAccess>]
+module CandidateName =
+
+    /// Construct a valid perosn name from a raw string or indicate that the string is not a valid employee name.
+    let make rawIdentifier =
+        let validPersonName = Regex("^[a-zA-Z]+$")
+        rawIdentifier
+        |> CustomValidation.nonEmpty "Person name may not be empty."
+        |> Result.bind (CustomValidation.matches validPersonName "Person name must be in format: 'Firstname'")
+        |> Result.map CandidateName
+   
+    let toString (CandidateName name) = name
+    let validPersonName = Regex("^[a-zA-Z]+$")
+
+    let fromString (s: string) : Result<CandidateName, string> =
+        s |> CustomValidation.matches validPersonName "Invalid person name" |> Result.map CandidateName
+
+    let encoder : Encoder<CandidateName> =
+        fun (CandidateName name) -> Encode.string name
+
+    let decoder : Decoder<CandidateName> =
+        Decode.string
+        |> Decode.andThen (fun s ->
+            match fromString s with
+            | Ok name -> Decode.succeed name
+            | Error err -> Decode.fail err)
 
 type MinutesAmount = private | MinutesAmount of int
 
