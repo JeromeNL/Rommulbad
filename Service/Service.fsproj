@@ -7,9 +7,11 @@
 
     <ItemGroup>
       <Compile Include="Serializers.fs" />
-      <Folder Include="General\" />
+      <Compile Include="Candidate\Serializer.fs" />
       <Compile Include="Candidate\Candidate.fs" />
+      <Compile Include="Session\Serializer.fs" />
       <Compile Include="Session\Session.fs" />
+      <Compile Include="Guardian\Serializer.fs" />
       <Compile Include="Guardian\Guardian.fs" />
       <Compile Include="HttpHandlers.fs" />
     </ItemGroup>

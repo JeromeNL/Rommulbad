@@ -9,6 +9,7 @@ open Rommulbad.Store
 open Model.General
 open System
 open Model.Candidate
+open Service.Candidate.Serializer
 
 let getCandidates: HttpHandler =
     fun next ctx ->
@@ -63,7 +64,6 @@ let addCandidate : HttpHandler =
                 // Convert Candidate fields to strings
                 let nameStr = CandidateName.toString candidate.Name
                 let guardianIdStr = GuardianIdentifier.toString candidate.GuardianId
-                let diplomaStr = match candidate.Diploma with Diploma diploma -> diploma
                 let currentDateTime = DateTime.Now
 
                 // Prepare the value to insert

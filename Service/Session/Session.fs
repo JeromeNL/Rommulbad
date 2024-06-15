@@ -7,7 +7,7 @@ open Service.Serializers
 open Rommulbad.Store
 open Thoth.Json.Net
 open Model.General
-
+open Service.Session.Serializer
 
 let addSession (name: string) : HttpHandler =
     fun next ctx ->
