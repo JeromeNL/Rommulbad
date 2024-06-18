@@ -4,5 +4,5 @@ open Model.General
 
 type Candidate =
     { Name: CandidateName
-      GuardianId: GuardianIdentifier
+      GuardianId: GuardianId
       Diploma: Diploma }

@@ -19,8 +19,8 @@ let addGuardian : HttpHandler =
                 let store = ctx.GetService<Store>()
 
                 // Convert GuardianIdentifier to string
-                let idStr = GuardianIdentifier.toString guardian.Id
-                let nameStr = PersonName.toString guardian.Name
+                let idStr = GuardianId.toString guardian.Id
+                let nameStr = GuardianName.toString guardian.Name
 
                 // Prepare the value to insert
                 let value = (idStr, nameStr)
@@ -40,7 +40,7 @@ let getGuardians: HttpHandler =
             let guardians =
                 InMemoryDatabase.all store.guardians
                 |> Seq.choose (fun (id, name) ->
-                    match (GuardianIdentifier.make id, PersonName.make name) with
+                    match (GuardianId.make id, GuardianName.make name) with
                     | (Ok id, Ok name) ->
                         Some { Guardian.Id = id; Name = name; Candidates = [] }
                     | _ -> None)
@@ -49,9 +49,6 @@ let getGuardians: HttpHandler =
             return! json response next ctx
         }
         
-
-
-
 let routes: HttpHandler =
     choose
         [ POST >=> route "/guardian" >=> addGuardian

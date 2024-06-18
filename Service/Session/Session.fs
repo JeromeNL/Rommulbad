@@ -11,7 +11,6 @@ open Service.Session.Serializer
 let addSession (name: string) : HttpHandler =
     fun next ctx ->
         task {
-
             let! session = ThothSerializer.ReadBody ctx Session.decode
 
             match session with

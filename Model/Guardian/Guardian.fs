@@ -4,6 +4,6 @@ open Model.General
 open Model.Candidate.Candidate
 
 type Guardian =
-    { Id: GuardianIdentifier
-      Name: PersonName
+    { Id: GuardianId
+      Name: GuardianName
       Candidates: List<Candidate> }

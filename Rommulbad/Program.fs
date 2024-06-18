@@ -9,11 +9,9 @@ open Rommulbad
 open Rommulbad.Store
 
 let configureApp (app: IApplicationBuilder) =
-    // Add Giraffe to the ASP.NET Core pipeline
-    app.UseGiraffe HttpHandlers.requestHandlers
+    app.UseGiraffe HttpHandlers.httpHandlers
 
 let configureServices (services: IServiceCollection) =
-    // Add Giraffe dependencies
     services
         .AddGiraffe()
         .AddSingleton<Store>(Store())

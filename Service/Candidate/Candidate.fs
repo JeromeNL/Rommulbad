@@ -18,7 +18,7 @@ let getCandidates: HttpHandler =
             let candidates =
                 InMemoryDatabase.all store.candidates
                 |> Seq.choose (fun (name, _, gId, dpl) ->
-                    match (CandidateName.make name, GuardianIdentifier.make gId, Diploma.make dpl) with
+                    match (CandidateName.make name, GuardianId.make gId, Diploma.make dpl) with
                     | (Ok name, Ok gId, Ok dpl) ->
                         Some { Candidate.Name = name; GuardianId = gId; Diploma = dpl }
                     | _ -> None)
@@ -35,9 +35,9 @@ let getCandidate (name: string) : HttpHandler =
             let candidate = InMemoryDatabase.lookup name store.candidates
 
             match candidate with
-            | None -> return! RequestErrors.NOT_FOUND "Employee not found!" next ctx
+            | None -> return! RequestErrors.NOT_FOUND "Candidate not found!" next ctx
             | Some(name, _, gId, dpl) ->
-                match (CandidateName.make name, GuardianIdentifier.make gId, Diploma.make dpl) with
+                match (CandidateName.make name, GuardianId.make gId, Diploma.make dpl) with
                 | (Ok name, Ok gId, Ok dpl) ->
                     return!
                         ThothSerializer.RespondJson
@@ -62,7 +62,7 @@ let addCandidate : HttpHandler =
 
                 // Convert Candidate fields to strings
                 let nameStr = CandidateName.toString candidate.Name
-                let guardianIdStr = GuardianIdentifier.toString candidate.GuardianId
+                let guardianIdStr = GuardianId.toString candidate.GuardianId
                 let currentDateTime = DateTime.Now
 
                 // Prepare the value to insert
@@ -73,6 +73,21 @@ let addCandidate : HttpHandler =
                 | Ok () -> return! json candidate next ctx
                 | Error (UniquenessError msg) -> return! RequestErrors.BAD_REQUEST msg next ctx
         }
+        
+        
+ // Function to check if candidate can get the diploma
+let canGetDiploma diploma sessions =
+    let totalMinutes = sessions |> List.sumBy (fun (_, _, _, min) -> min)
+    let validSessions = sessions |> List.filter (fun (_, _, _, min) -> min >= match diploma with
+                                                                              | "A" -> 1
+                                                                              | "B" -> 10
+                                                                              | "C" -> 15
+                                                                              | _ -> Int32.MaxValue)
+    match diploma with
+    | "A" -> totalMinutes >= 120 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 120
+    | "B" -> totalMinutes >= 150 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 150
+    | "C" -> totalMinutes >= 180 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 180
+    | _ -> false
         
 let updateCandidateDiploma : HttpHandler =
     fun next ctx ->
@@ -86,27 +101,13 @@ let updateCandidateDiploma : HttpHandler =
 
                 // Convert Candidate fields to strings
                 let nameStr = Model.General.CandidateName.toString candidateUpdate.Name
-                let newDiplomaStr = match candidateUpdate.Diploma with Model.General.Diploma diploma -> diploma
+                let newDiplomaStr = match candidateUpdate.Diploma with Diploma diploma -> diploma
                 
                 // Retrieve the existing candidate sessions
                 let candidateSessions = 
                     InMemoryDatabase.filter (fun (n, _, _, _) -> n = nameStr) store.sessions
                     |> Seq.toList
                 
-                // Function to check if candidate can get the diploma
-                let canGetDiploma diploma sessions =
-                    let totalMinutes = sessions |> List.sumBy (fun (_, _, _, min) -> min)
-                    let validSessions = sessions |> List.filter (fun (_, _, _, min) -> min >= match diploma with
-                                                                                              | "A" -> 1
-                                                                                              | "B" -> 10
-                                                                                              | "C" -> 15
-                                                                                              | _ -> Int32.MaxValue)
-                    match diploma with
-                    | "A" -> totalMinutes >= 120 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 120
-                    | "B" -> totalMinutes >= 150 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 150
-                    | "C" -> totalMinutes >= 180 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 180
-                    | _ -> false
-
                 // Check if candidate is eligible for the new diploma
                 if canGetDiploma newDiplomaStr candidateSessions then
                     // Retrieve the existing candidate
@@ -124,9 +125,6 @@ let updateCandidateDiploma : HttpHandler =
                 else
                     return! RequestErrors.BAD_REQUEST "Candidate does not meet the requirements for the new diploma" next ctx
         }
-
-
-
 
 
 

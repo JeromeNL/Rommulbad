@@ -1,8 +1,6 @@
 module Service.Guardian.Serializer
 
 open Thoth.Json.Net
-open Model.Candidate.Candidate
-open Model.Session.Session
 open Model.General
 open Model.Guardian.Guardian
 
@@ -11,8 +9,8 @@ module Guardian =
     let encode: Encoder<Guardian> =
         fun guardian ->
             Encode.object
-                [ "id", Encode.string (match guardian.Id with GuardianIdentifier id -> id)
-                  "name", Encode.string (match guardian.Name with PersonName name -> name) ]
+                [ "id", Encode.string (match guardian.Id with GuardianId id -> id)
+                  "name", Encode.string (match guardian.Name with GuardianName name -> name) ]
 
     let decode: Decoder<Guardian> =
         Decode.object (fun get ->
@@ -20,7 +18,7 @@ module Guardian =
             let name = get.Required.Field "name" Decode.string
             (id, name))
         |> Decode.andThen (fun (id, name) ->
-            match GuardianIdentifier.make id, PersonName.make name with
+            match GuardianId.make id, GuardianName.make name with
             | Ok guardianId, Ok personName ->
                 Decode.succeed { Id = guardianId; Name = personName; Candidates = [] } // Ignore candidates
             | Error idErr, _ -> Decode.fail idErr

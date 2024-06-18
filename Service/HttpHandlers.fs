@@ -1,12 +1,11 @@
 module Rommulbad.HttpHandlers
 
 open Giraffe
-open Rommulbad.Candidate
 open Rommulbad.Session
+open Rommulbad.Candidate
 open Rommulbad.Guardian
 
-
-let requestHandlers: HttpHandler =
+let httpHandlers: HttpHandler =
     choose [
         Candidate.routes
         Session.routes

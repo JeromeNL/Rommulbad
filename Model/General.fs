@@ -4,31 +4,31 @@ open System.Text.RegularExpressions
 open Thoth.Json.Net
 
 
-type GuardianIdentifier = private | GuardianIdentifier of string
+type GuardianId = private | GuardianId of string
 
 /// Provides access to raw department identifier by pattern matching.
-let (|GuardianIdentifier|) (GuardianIdentifier guardianIdentifier) = guardianIdentifier
+let (|GuardianId|) (GuardianId guardianIdentifier) = guardianIdentifier
 
 [<RequireQualifiedAccess>]
-module GuardianIdentifier =
+module GuardianId =
 
-    /// A valid GuadianIdentifier is three digits, dash, 4 capital letters
-    let private validDepartmentIdentifier = Regex "^\d{3}-[A-Z]{4}$"
+    /// A valid GuardianId is three digits, dash, 4 capital letters
+    let private validGuardianId = Regex "^\d{3}-[A-Z]{4}$"
 
-    let make rawIdentifier =
-        rawIdentifier
-        |> CustomValidation.matches validDepartmentIdentifier "ID must be in format: 123-ABCD"
-        |> Result.map GuardianIdentifier
+    let make incomingId =
+        incomingId
+        |> CustomValidation.matchesRegex validGuardianId "ID must be in format: 123-ABCD"
+        |> Result.map GuardianId
         
-    let toString (GuardianIdentifier id) = id
+    let toString (GuardianId id) = id
     
-    let fromString (s: string) : Result<GuardianIdentifier, string> =
-        s |> CustomValidation.matches validDepartmentIdentifier "ID must be in format: 123-ABCD" |> Result.map GuardianIdentifier
+    let fromString (s: string) : Result<GuardianId, string> =
+        s |> CustomValidation.matchesRegex validGuardianId "ID must be in format: 123-ABCD" |> Result.map GuardianId
 
-    let encoder : Encoder<GuardianIdentifier> =
-        fun (GuardianIdentifier id) -> Encode.string id
+    let encoder : Encoder<GuardianId> =
+        fun (GuardianId id) -> Encode.string id
 
-    let decoder : Decoder<GuardianIdentifier> =
+    let decoder : Decoder<GuardianId> =
         Decode.string
         |> Decode.andThen (fun s ->
             match fromString s with
@@ -36,31 +36,31 @@ module GuardianIdentifier =
             | Error err -> Decode.fail err)
 
 // Name format: "Joram Kwetters" GUARDIAN
-type PersonName = private | PersonName of string
+type GuardianName = private | GuardianName of string
 
-let (|PersonName|) (PersonName personName) = personName
+let (|GuardianName|) (GuardianName personName) = personName
 
 [<RequireQualifiedAccess>]
-module PersonName =
+module GuardianName =
 
     /// Construct a valid perosn name from a raw string or indicate that the string is not a valid employee name.
     let make rawIdentifier =
-        let validPersonName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
+        let validGuardianName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
         rawIdentifier
-        |> CustomValidation.nonEmpty "Person name may not be empty."
-        |> Result.bind (CustomValidation.matches validPersonName "Person name must be in format: 'Firstname Lastname'")
-        |> Result.map PersonName
+        |> CustomValidation.isNotEmpty "Guardian name may not be empty."
+        |> Result.bind (CustomValidation.matchesRegex validGuardianName "Guardian name must be in format: 'Firstname Lastname'")
+        |> Result.map GuardianName
    
-    let toString (PersonName name) = name
-    let validPersonName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
+    let toString (GuardianName name) = name
+    let validGuardianName = Regex("^[a-zA-Z]+ [a-zA-Z]+$")
 
-    let fromString (s: string) : Result<PersonName, string> =
-        s |> CustomValidation.matches validPersonName "Invalid person name" |> Result.map PersonName
+    let fromString (s: string) : Result<GuardianName, string> =
+        s |> CustomValidation.matchesRegex validGuardianName "Invalid guardian name" |> Result.map GuardianName
 
-    let encoder : Encoder<PersonName> =
-        fun (PersonName name) -> Encode.string name
+    let encoder : Encoder<GuardianName> =
+        fun (GuardianName name) -> Encode.string name
 
-    let decoder : Decoder<PersonName> =
+    let decoder : Decoder<GuardianName> =
         Decode.string
         |> Decode.andThen (fun s ->
             match fromString s with
@@ -79,15 +79,15 @@ module CandidateName =
     let make rawIdentifier =
         let validPersonName = Regex("^[a-zA-Z]+$")
         rawIdentifier
-        |> CustomValidation.nonEmpty "Person name may not be empty."
-        |> Result.bind (CustomValidation.matches validPersonName "Person name must be in format: 'Firstname'")
+        |> CustomValidation.isNotEmpty "Candidate name may not be empty."
+        |> Result.bind (CustomValidation.matchesRegex validPersonName "Candidate name must be in format: 'Firstname'")
         |> Result.map CandidateName
    
     let toString (CandidateName name) = name
     let validPersonName = Regex("^[a-zA-Z]+$")
 
     let fromString (s: string) : Result<CandidateName, string> =
-        s |> CustomValidation.matches validPersonName "Invalid person name" |> Result.map CandidateName
+        s |> CustomValidation.matchesRegex validPersonName "Invalid candidate name" |> Result.map CandidateName
 
     let encoder : Encoder<CandidateName> =
         fun (CandidateName name) -> Encode.string name
@@ -109,9 +109,9 @@ module MinutesAmount =
     let private minMinutesAmount = 0
     let private maxMinutesAmount = 30
 
-    let make rawHours =
-        rawHours
-        |> CustomValidation.between minMinutesAmount maxMinutesAmount "Minutes must be between 0 and 30 minutes"
+    let make rawMinutes =
+        rawMinutes
+        |> CustomValidation.timeIsBetween minMinutesAmount maxMinutesAmount "Minutes must be between 0 and 30 minutes"
         |> Result.map MinutesAmount
 
 
@@ -128,14 +128,14 @@ let (|Diploma|) (Diploma diploma) = diploma
 module Diploma =
 
     /// Valid diploma values
-    let private validDiplomaValues = ["A"; "B"; "C"; ""]
+    let private validDiplomaOptions = ["A"; "B"; "C"; ""]
 
     /// Construct a valid diploma from a raw string or indicate that the string is not a valid diploma.
     let make rawDiploma =
-        if List.contains rawDiploma validDiplomaValues then
+        if List.contains rawDiploma validDiplomaOptions then
             Ok (Diploma rawDiploma)
         else
-            Error "Diploma must be empty, A, B, or C"
+            Error "Diploma must be A, B, C (or empty)"
 
 
 
