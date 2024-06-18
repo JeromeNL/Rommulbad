@@ -3,7 +3,6 @@ module Rommulbad.Guardian.Guardian
 open Giraffe
 open Rommulbad.Database
 open Thoth.Json.Giraffe
-open Service.Serializers
 open Rommulbad.Store
 open Model.Guardian.Guardian
 open Model.General

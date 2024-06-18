@@ -16,13 +16,14 @@ module Candidate =
 
     let decode: Decoder<Candidate> =
         Decode.object (fun get ->
-            match (CandidateName.make (get.Required.Field "name" Decode.string),
-                   GuardianIdentifier.make (get.Required.Field "guardian_id" Decode.string),
-                   Diploma.make (get.Required.Field "diploma" Decode.string)) with
+            let nameResult = CandidateName.make (get.Required.Field "name" Decode.string)
+            let guardianIdResult = GuardianIdentifier.make (get.Required.Field "guardian_id" Decode.string)
+            let diplomaResult = Diploma.make (get.Required.Field "diploma" Decode.string)
+            (nameResult, guardianIdResult, diplomaResult))
+        |> Decode.andThen (fun (nameResult, guardianIdResult, diplomaResult) ->
+            match (nameResult, guardianIdResult, diplomaResult) with
             | (Ok name, Ok guardianId, Ok diploma) ->
-                { Name = name
-                  GuardianId = guardianId
-                  Diploma = diploma }
-            | (Error err, _, _) -> failwithf "Error decoding name: %s" err
-            | (_, Error err, _) -> failwithf "Error decoding guardian_id: %s" err
-            | (_, _, Error err) -> failwithf "Error decoding diploma: %s" err)
+                Decode.succeed { Name = name; GuardianId = guardianId; Diploma = diploma }
+            | (Error nameErr, _, _) -> Decode.fail nameErr
+            | (_, Error guardianIdErr, _) -> Decode.fail guardianIdErr
+            | (_, _, Error diplomaErr) -> Decode.fail diplomaErr)

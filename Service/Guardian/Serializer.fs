@@ -18,11 +18,10 @@ module Guardian =
         Decode.object (fun get ->
             let id = get.Required.Field "id" Decode.string
             let name = get.Required.Field "name" Decode.string
-
+            (id, name))
+        |> Decode.andThen (fun (id, name) ->
             match GuardianIdentifier.make id, PersonName.make name with
             | Ok guardianId, Ok personName ->
-                { Id = guardianId
-                  Name = personName
-                  Candidates = [] }  // Ignore candidates
-            | Error idErr, _ -> failwith idErr
-            | _, Error nameErr -> failwith nameErr )
+                Decode.succeed { Id = guardianId; Name = personName; Candidates = [] } // Ignore candidates
+            | Error idErr, _ -> Decode.fail idErr
+            | _, Error nameErr -> Decode.fail nameErr)

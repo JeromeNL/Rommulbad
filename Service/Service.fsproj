@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Include="Serializers.fs" />
       <Compile Include="Candidate\Serializer.fs" />
       <Compile Include="Candidate\Candidate.fs" />
       <Compile Include="Session\Serializer.fs" />

@@ -4,7 +4,6 @@ open Giraffe
 open Model.Candidate.Candidate
 open Rommulbad.Database
 open Thoth.Json.Giraffe
-open Service.Serializers
 open Rommulbad.Store
 open Model.General
 open System
