@@ -10,6 +10,7 @@ open System
 open Model.Candidate
 open Service.Candidate.Serializer
 
+// Get all (valid) candidates
 let getCandidates: HttpHandler =
     fun next ctx ->
         task {
@@ -26,7 +27,7 @@ let getCandidates: HttpHandler =
             return! ThothSerializer.RespondJsonSeq candidates Candidate.encode next ctx
         }
 
-
+// Get one candidate
 let getCandidate (name: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -50,6 +51,7 @@ let getCandidate (name: string) : HttpHandler =
                 | _ -> return! RequestErrors.BAD_REQUEST "Invalid candidate data" next ctx
         }
         
+// Add a new candidate by Name and GuardianId
 let addCandidate : HttpHandler =
     fun next ctx ->
         task {
@@ -89,6 +91,7 @@ let canGetDiploma diploma sessions =
     | "C" -> totalMinutes >= 180 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 180
     | _ -> false
         
+// Update the current (highest) diploma of a candidate (with check)
 let updateCandidateDiploma : HttpHandler =
     fun next ctx ->
         task {
@@ -126,8 +129,7 @@ let updateCandidateDiploma : HttpHandler =
                     return! RequestErrors.BAD_REQUEST "Candidate does not meet the requirements for the new diploma" next ctx
         }
 
-
-
+// Routes of candidate
 let routes: HttpHandler =
     choose
         [ GET >=> route "/candidate" >=> getCandidates

@@ -6,6 +6,7 @@ open Model.Candidate.Candidate
 
 
 module Candidate =
+    // Encode a candidate to JSON
     let encode: Encoder<Candidate> =
         fun candidate ->
             Encode.object
@@ -13,6 +14,7 @@ module Candidate =
                   "guardian_id", Encode.string (match candidate.GuardianId with GuardianId id -> id)
                   "diploma", Encode.string (match candidate.Diploma with Diploma diploma -> diploma) ]
 
+    // Decode JSON to a candidate (with validation)
     let decode: Decoder<Candidate> =
         Decode.object (fun get ->
             let nameResult = CandidateName.make (get.Required.Field "name" Decode.string)

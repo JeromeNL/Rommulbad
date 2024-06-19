@@ -8,6 +8,7 @@ open Thoth.Json.Net
 open Rommulbad
 open Rommulbad.Store
 
+// In the program.fs has nothing changed
 let configureApp (app: IApplicationBuilder) =
     app.UseGiraffe HttpHandlers.httpHandlers
 

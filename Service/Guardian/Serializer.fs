@@ -6,12 +6,14 @@ open Model.Guardian.Guardian
 
 
 module Guardian =
+    // Encode Guardian to JSON
     let encode: Encoder<Guardian> =
         fun guardian ->
             Encode.object
                 [ "id", Encode.string (match guardian.Id with GuardianId id -> id)
                   "name", Encode.string (match guardian.Name with GuardianName name -> name) ]
 
+     // Decode JSON to a Guardian (with validation)
     let decode: Decoder<Guardian> =
         Decode.object (fun get ->
             let id = get.Required.Field "id" Decode.string
