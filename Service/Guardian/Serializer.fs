@@ -22,6 +22,6 @@ module Guardian =
         |> Decode.andThen (fun (id, name) ->
             match GuardianId.make id, GuardianName.make name with
             | Ok guardianId, Ok personName ->
-                Decode.succeed { Id = guardianId; Name = personName; Candidates = [] } // Ignore candidates
+                Decode.succeed { Id = guardianId; Name = personName; Candidates = [] }
             | Error idErr, _ -> Decode.fail idErr
             | _, Error nameErr -> Decode.fail nameErr)

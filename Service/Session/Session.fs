@@ -10,7 +10,7 @@ open Service.Session.Serializer
 open Model.Session.Session
 
 // Add a new session
-let addSession () : HttpHandler =
+let addSession : HttpHandler =
     fun next ctx ->
         task {
             let! session = ThothSerializer.ReadBody ctx decode
@@ -59,7 +59,7 @@ let getTotalMinutes (name: string) : HttpHandler =
             return! ThothSerializer.RespondJson total Encode.int next ctx
         }
 
-// get the session that are eligible for a specific candiate and diploma
+// get the session that are eligible for a specific candidate and diploma
 let getEligibleSessions (name: string, diploma: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -91,7 +91,7 @@ let getEligibleSessions (name: string, diploma: string) : HttpHandler =
         }
 
 
-// get all total eligible minutes for a specific 
+// get all total eligible minutes for a specific candidate and diploma
 let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -121,7 +121,7 @@ let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
 // Routes for session endpoints 
 let routes: HttpHandler =
     choose
-        [ POST >=> route "/candidate/session" >=> addSession()
+        [ POST >=> route "/candidate/session" >=> addSession
           GET >=> routef "/candidate/%s/session" getSessions
           GET >=> routef "/candidate/%s/session/total" getTotalMinutes
           GET >=> routef "/candidate/%s/session/%s" getEligibleSessions
