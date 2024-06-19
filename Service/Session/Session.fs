@@ -9,6 +9,7 @@ open Model.General
 open Service.Session.Serializer
 open Model.Session.Session
 
+// Add a new session
 let addSession () : HttpHandler =
     fun next ctx ->
         task {
@@ -26,7 +27,7 @@ let addSession () : HttpHandler =
                 return! text "OK" next ctx
         }
 
-
+// get all sessions for a specific candidate
 let getSessions (name: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -44,7 +45,7 @@ let getSessions (name: string) : HttpHandler =
 
             return! ThothSerializer.RespondJsonSeq sessions Session.encode next ctx
         }
-
+// get total session minutes of a specific candidate
 let getTotalMinutes (name: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -58,7 +59,7 @@ let getTotalMinutes (name: string) : HttpHandler =
             return! ThothSerializer.RespondJson total Encode.int next ctx
         }
 
-
+// get the session that are eligible for a specific candiate and diploma
 let getEligibleSessions (name: string, diploma: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -90,6 +91,7 @@ let getEligibleSessions (name: string, diploma: string) : HttpHandler =
         }
 
 
+// get all total eligible minutes for a specific 
 let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
     fun next ctx ->
         task {
@@ -106,8 +108,7 @@ let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
                 | "B" -> 10
                 | _ -> 15
 
-            let filter (n, d, _, a) = (d || shallowOk) && (a >= minMinutes)
-
+            let filter (n, d, _, a) = (n = name) && ((d || shallowOk) && (a >= minMinutes))
 
             let total =
                 InMemoryDatabase.filter filter store.sessions
@@ -116,7 +117,8 @@ let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
 
             return! ThothSerializer.RespondJson total Encode.int next ctx
         }
-        
+
+// Routes for session endpoints 
 let routes: HttpHandler =
     choose
         [ POST >=> route "/candidate/session" >=> addSession()

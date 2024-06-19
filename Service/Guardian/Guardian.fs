@@ -8,6 +8,7 @@ open Model.Guardian.Guardian
 open Model.General
 open Service.Guardian.Serializer
 
+// Add a new guardian
 let addGuardian : HttpHandler =
     fun next ctx ->
         task {
@@ -31,7 +32,7 @@ let addGuardian : HttpHandler =
                 | Error (UniquenessError msg) -> return! RequestErrors.BAD_REQUEST msg next ctx
         }
 
-
+// Get all guardians 
 let getGuardians: HttpHandler =
     fun next ctx ->
         task {
@@ -49,6 +50,7 @@ let getGuardians: HttpHandler =
             return! json response next ctx
         }
         
+// Routes for guardians
 let routes: HttpHandler =
     choose
         [ POST >=> route "/guardian" >=> addGuardian
