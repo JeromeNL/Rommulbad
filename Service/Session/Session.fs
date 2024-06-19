@@ -7,6 +7,7 @@ open Rommulbad.Store
 open Thoth.Json.Net
 open Model.General
 open Service.Session.Serializer
+open Model.Session.Session
 
 let addSession () : HttpHandler =
     fun next ctx ->
@@ -26,21 +27,22 @@ let addSession () : HttpHandler =
         }
 
 
-let encodeSession (_, deep, date, minutes) =
-    Encode.object
-        [ "date", Encode.datetime date
-          "deep", Encode.bool deep
-          "minutes", Encode.int minutes ]
-
-
 let getSessions (name: string) : HttpHandler =
     fun next ctx ->
         task {
             let store = ctx.GetService<Store>()
 
-            let sessions = InMemoryDatabase.filter (fun (n, _, _, _) -> n = name) store.sessions
+            // Filter the sessions based on the candidate name and convert to Session type
+            let sessions = 
+                store.sessions 
+                |> InMemoryDatabase.filter (fun (n, _, _, _) -> n = name)
+                |> Seq.choose (fun (n, deep, date, minutes) ->
+                    match (CandidateName.make n, MinutesAmount.make minutes) with
+                    | (Ok name, Ok minutesAmount) ->
+                        Some { Name = name; Deep = deep; Date = date; Minutes = minutesAmount }
+                    | _ -> None)
 
-            return! ThothSerializer.RespondJsonSeq sessions encodeSession next ctx
+            return! ThothSerializer.RespondJsonSeq sessions Session.encode next ctx
         }
 
 let getTotalMinutes (name: string) : HttpHandler =
@@ -60,7 +62,6 @@ let getTotalMinutes (name: string) : HttpHandler =
 let getEligibleSessions (name: string, diploma: string) : HttpHandler =
     fun next ctx ->
         task {
-
             let store = ctx.GetService<Store>()
 
             let shallowOk =
@@ -74,14 +75,20 @@ let getEligibleSessions (name: string, diploma: string) : HttpHandler =
                 | "B" -> 10
                 | _ -> 15
 
-            let filter (n, d, _, a) = (d || shallowOk) && (a >= minMinutes)
+            let filter (n, d, _, a) = (n = name) && ((d || shallowOk) && (a >= minMinutes))
 
+            let sessions = 
+                store.sessions 
+                |> InMemoryDatabase.filter filter
+                |> Seq.choose (fun (n, deep, date, minutes) ->
+                    match (CandidateName.make n, MinutesAmount.make minutes) with
+                    | (Ok name, Ok minutesAmount) ->
+                        Some { Name = name; Deep = deep; Date = date; Minutes = minutesAmount }
+                    | _ -> None)
 
-            let sessions = InMemoryDatabase.filter filter store.sessions
-
-            return! ThothSerializer.RespondJsonSeq sessions encodeSession next ctx
-
+            return! ThothSerializer.RespondJsonSeq sessions Session.encode next ctx
         }
+
 
 let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
     fun next ctx ->

@@ -9,7 +9,8 @@ module Session =
     let encode: Encoder<Session> =
         fun session ->
             Encode.object
-                [ "deep", Encode.bool session.Deep
+                [ "name", CandidateName.encoder session.Name
+                  "deep", Encode.bool session.Deep
                   "date", Encode.datetime session.Date
                   "amount", Encode.int (match session.Minutes with MinutesAmount minutes -> minutes) ]
 
