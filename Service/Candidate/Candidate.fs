@@ -67,13 +67,21 @@ let addCandidate : HttpHandler =
                 let guardianIdStr = GuardianId.toString candidate.GuardianId
                 let currentDateTime = DateTime.Now
 
-                // Prepare the value to insert
-                let value = (nameStr, currentDateTime, guardianIdStr, "")
-                
-                // Insert the candidate
-                match InMemoryDatabase.insert nameStr value store.candidates with
-                | Ok () -> return! json candidate next ctx
-                | Error (UniquenessError msg) -> return! RequestErrors.BAD_REQUEST msg next ctx
+                // Check if the guardian exists in the database
+                let guardianExists = 
+                    InMemoryDatabase.all store.guardians
+                    |> Seq.exists (fun (id, _) -> id = guardianIdStr)
+
+                if not guardianExists then
+                    return! RequestErrors.BAD_REQUEST "Guardian does not exist." next ctx
+                else
+                    // Prepare the value to insert
+                    let value = (nameStr, currentDateTime, guardianIdStr, "")
+                    
+                    // Insert the candidate
+                    match InMemoryDatabase.insert nameStr value store.candidates with
+                    | Ok () -> return! json candidate next ctx
+                    | Error (UniquenessError msg) -> return! RequestErrors.BAD_REQUEST msg next ctx
         }
         
         
