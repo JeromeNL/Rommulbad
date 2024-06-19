@@ -97,7 +97,7 @@ let canGetDiploma diploma sessions =
     | "A" -> totalMinutes >= 120 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 120
     | "B" -> totalMinutes >= 150 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 150
     | "C" -> totalMinutes >= 180 && validSessions |> List.sumBy (fun (_, _, _, min) -> min) >= 180
-    | _ -> false
+    | _ -> true
         
 // Update the current (highest) diploma of a candidate (with check)
 let updateCandidateDiploma : HttpHandler =
