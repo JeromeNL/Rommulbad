@@ -8,14 +8,14 @@ open Thoth.Json.Net
 open Model.General
 open Service.Session.Serializer
 
-let addSession (name: string) : HttpHandler =
+let addSession () : HttpHandler =
     fun next ctx ->
         task {
-            let! session = ThothSerializer.ReadBody ctx Session.decode
+            let! session = ThothSerializer.ReadBody ctx decode
 
             match session with
             | Error errorMessage -> return! RequestErrors.BAD_REQUEST errorMessage next ctx
-            | Ok { Deep = deep; Date = date; Minutes = (MinutesAmount minutes) } ->
+            | Ok { Name = CandidateName name; Deep = deep; Date = date; Minutes = (MinutesAmount minutes) } ->
                 let store = ctx.GetService<Store>()
 
                 // Insert the session with minutes converted to int
@@ -24,6 +24,7 @@ let addSession (name: string) : HttpHandler =
 
                 return! text "OK" next ctx
         }
+
 
 let encodeSession (_, deep, date, minutes) =
     Encode.object
@@ -111,7 +112,7 @@ let getTotalEligibleMinutes (name: string, diploma: string) : HttpHandler =
         
 let routes: HttpHandler =
     choose
-        [ POST >=> routef "/candidate/%s/session" addSession
+        [ POST >=> route "/candidate/session" >=> addSession()
           GET >=> routef "/candidate/%s/session" getSessions
           GET >=> routef "/candidate/%s/session/total" getTotalMinutes
           GET >=> routef "/candidate/%s/session/%s" getEligibleSessions

@@ -5,7 +5,7 @@ open Model.General
 
 // Type for Session
 type Session =
-    { 
+    { Name: CandidateName
       Deep: Boolean
       Date: DateTime
       Minutes: MinutesAmount }
